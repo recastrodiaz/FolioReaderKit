@@ -134,6 +134,9 @@ open class FolioReaderConfig: NSObject {
 
     /// hide the navigation bar and the bottom status view
     open var hideBars = false
+    
+    /// hides the top navigation bar
+    open var hideTopNavigation = false
 
     /// If `canChangeScrollDirection` is `true` it will be overrided by user's option.
     open var scrollDirection: FolioReaderScrollDirection = .defaultVertical
@@ -149,6 +152,9 @@ open class FolioReaderConfig: NSObject {
 
     /// Allow sharing option, if `false` will hide all sharing icons and options
     open var allowSharing = true
+    
+    /// Allow selecting day/night tehem option, if `false` will hide all day/night icons
+    open var allowDayNight = true
 
     /// Enable TTS (Text To Speech)
     open var enableTTS = true

@@ -258,6 +258,10 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     }
 
     func configureNavBarButtons() {
+        
+        if readerConfig.hideTopNavigation {
+            return
+        }
 
         // Navbar buttons
         let shareIcon = UIImage(readerImageNamed: "icon-navbar-share")?.ignoreSystemTint(withConfiguration: self.readerConfig)
@@ -1346,7 +1350,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     /**
      Present fonts and settings menu
      */
-    @objc func presentFontsMenu() {
+    @objc open func presentFontsMenu() {
         folioReader.saveReaderState()
         hideBars()
 
