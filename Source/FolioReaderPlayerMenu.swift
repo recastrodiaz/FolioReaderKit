@@ -16,7 +16,7 @@ class FolioReaderPlayerMenu: UIViewController, SMSegmentViewDelegate, UIGestureR
     var viewDidAppear = false
 
     fileprivate var readerConfig: FolioReaderConfig
-    fileprivate var folioReader: FolioReader
+    public private(set) var folioReader: FolioReader
 
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
         self.readerConfig = readerConfig

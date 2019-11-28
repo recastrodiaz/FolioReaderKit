@@ -8,13 +8,21 @@
 
 import UIKit
 
+public protocol FolioTextSelectionDelegate {
+    
+    func createTextMenu(_ fromExistingHighlight: Bool)
+    
+    func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool
+    
+}
+
 /// The custom WebView used in each page
 open class FolioReaderWebView: UIWebView {
-    var isColors = false
-    var isShare = false
+    public var isColors = false
+    public var isShare = false
     var isOneWord = false
 
-    fileprivate weak var readerContainer: FolioReaderContainer?
+    public weak var readerContainer: FolioReaderContainer?
 
     fileprivate var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
@@ -49,7 +57,7 @@ open class FolioReaderWebView: UIWebView {
 
     open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         guard readerConfig.useReaderMenuController else {
-            return super.canPerformAction(action, withSender: sender)
+            return readerConfig.textSelectionDelegate?.canPerformAction(action, withSender: sender) ?? false
         }
 
         if isShare {
@@ -72,7 +80,7 @@ open class FolioReaderWebView: UIWebView {
 
     // MARK: - UIMenuController - Actions
 
-    @objc func share(_ sender: UIMenuController) {
+    @objc open func share(_ sender: UIMenuController) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         let shareImage = UIAlertAction(title: self.readerConfig.localizedShareImageQuote, style: .default, handler: { (action) -> Void in
@@ -123,14 +131,14 @@ open class FolioReaderWebView: UIWebView {
         setMenuVisible(true)
     }
 
-    func remove(_ sender: UIMenuController?) {
+    open func remove(_ sender: UIMenuController?) {
         if let removedId = js("removeThisHighlight()") {
             Highlight.removeById(withConfiguration: self.readerConfig, highlightId: removedId)
         }
         setMenuVisible(false)
     }
 
-    @objc func highlight(_ sender: UIMenuController?) {
+    @objc open func highlight(_ sender: UIMenuController?) {
         let highlightAndReturn = js("highlightString('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')")
         let jsonData = highlightAndReturn?.data(using: String.Encoding.utf8)
 
@@ -166,7 +174,7 @@ open class FolioReaderWebView: UIWebView {
         }
     }
     
-    @objc func highlightWithNote(_ sender: UIMenuController?) {
+    @objc open func highlightWithNote(_ sender: UIMenuController?) {
         let highlightAndReturn = js("highlightStringWithNote('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')")
         let jsonData = highlightAndReturn?.data(using: String.Encoding.utf8)
         
@@ -192,13 +200,13 @@ open class FolioReaderWebView: UIWebView {
         }
     }
     
-    @objc func updateHighlightNote (_ sender: UIMenuController?) {
+    @objc open func updateHighlightNote (_ sender: UIMenuController?) {
         guard let highlightId = js("getHighlightId()") else { return }
         guard let highlightNote = Highlight.getById(withConfiguration: readerConfig, highlightId: highlightId) else { return }
         self.folioReader.readerCenter?.presentAddHighlightNote(highlightNote, edit: true)
     }
 
-    @objc func define(_ sender: UIMenuController?) {
+    @objc open func define(_ sender: UIMenuController?) {
         guard let selectedText = js("getSelectedText()") else {
             return
         }
@@ -212,29 +220,29 @@ open class FolioReaderWebView: UIWebView {
         readerContainer.show(vc, sender: nil)
     }
 
-    @objc func play(_ sender: UIMenuController?) {
+    @objc open func play(_ sender: UIMenuController?) {
         self.folioReader.readerAudioPlayer?.play()
 
         self.clearTextSelection()
     }
 
-    func setYellow(_ sender: UIMenuController?) {
+    open func setYellow(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .yellow)
     }
 
-    func setGreen(_ sender: UIMenuController?) {
+    open func setGreen(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .green)
     }
 
-    func setBlue(_ sender: UIMenuController?) {
+    open func setBlue(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .blue)
     }
 
-    func setPink(_ sender: UIMenuController?) {
+    open func setPink(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .pink)
     }
 
-    func setUnderline(_ sender: UIMenuController?) {
+    open func setUnderline(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .underline)
     }
 
@@ -253,6 +261,7 @@ open class FolioReaderWebView: UIWebView {
 
     func createMenu(options: Bool) {
         guard (self.readerConfig.useReaderMenuController == true) else {
+            self.readerConfig.textSelectionDelegate?.createTextMenu(options)
             return
         }
 
